@@ -87,3 +87,11 @@ class Speaker(BaseModel):
 
     name: str = Field(title="名前")
     speaker_id: int = Field(title="スピーカーID")
+
+
+class ReserveId(BaseModel):
+    """
+    /reserve_synthesisの戻り値
+    """
+
+    reserve_id: str = Field(title="予約ID")

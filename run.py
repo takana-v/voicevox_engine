@@ -1,9 +1,12 @@
 import argparse
+import asyncio
+from functools import partial
 import sys
 import zipfile
 from pathlib import Path
+import random
 from tempfile import NamedTemporaryFile, TemporaryFile
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import soundfile
 import uvicorn
@@ -20,6 +23,7 @@ from voicevox_engine.model import (
     ParseKanaBadRequest,
     ParseKanaError,
     Speaker,
+    ReserveId
 )
 from voicevox_engine.mora_list import openjtalk_mora2text
 from voicevox_engine.synthesis_engine import SynthesisEngine
@@ -103,6 +107,8 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
     root_dir = Path(__file__).parent
 
     default_sampling_rate = engine.default_sampling_rate
+    reserved_synthesis_futures: Dict[str] = {}
+    reserved_synthesis_sampling_rates: Dict[str] = {}
 
     app = FastAPI(
         title="VOICEVOX ENGINE",
@@ -128,6 +134,15 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
             ),
             speaker_id=speaker_id,
         )
+
+    def generate_reserve_id() -> str:
+        while True:
+            new_id = str(random.randrange(2**32))
+            if new_id not in reserved_synthesis_futures:
+                return new_id
+
+    async def wrap_synthesis(query: AudioQuery, speaker: int):
+        return engine.synthesis(query=query, speaker_id=speaker)
 
     def create_accent_phrases(text: str, speaker_id: int) -> List[AccentPhrase]:
         if len(text.strip()) == 0:
@@ -335,6 +350,50 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
                         zip_file.writestr(f"{str(i+1).zfill(3)}.wav", wav_file.read())
 
         return FileResponse(f.name, media_type="application/zip")
+
+    @app.post(
+        "/reserve_synthesis",
+        response_model=ReserveId,
+        tags=["音声合成"],
+        summary="音声合成を予約します。",
+    )
+    async def reserve_synthesis(query: AudioQuery, speaker: int):
+        id = generate_reserve_id()
+        loop = asyncio.get_running_loop()
+        ftr = asyncio.run_coroutine_threadsafe(wrap_synthesis(query=query, speaker=speaker), loop)
+        reserved_synthesis_futures[id] = ftr
+        reserved_synthesis_sampling_rates[id] = query.outputSamplingRate
+        return {"reserve_id": id}
+
+    @app.post(
+        "/get_reserved_data",
+        response_class=FileResponse,
+        responses={
+            200: {
+                "content": {
+                    "audio/wav": {"schema": {"type": "string", "format": "binary"}}
+                },
+            }
+        },
+        tags=["音声合成"],
+        summary="予約済みの音声合成データを取得します。",
+    )
+    def get_reserved_data(reserve_id: str):
+        if reserve_id not in reserved_synthesis_futures or reserve_id not in reserved_synthesis_sampling_rates:
+            raise HTTPException(status_code=422, detail="予約IDがみつかりません。")
+        try:
+            sampling_rate = reserved_synthesis_sampling_rates.pop(reserve_id)
+            wave = reserved_synthesis_futures.pop(reserve_id).result()
+        except Exception:
+            raise HTTPException(status_code=422, detail="合成でエラーが発生しました。")
+
+        with NamedTemporaryFile(delete=False) as f:
+            soundfile.write(
+                file=f, data=wave, samplerate=sampling_rate, format="WAV"
+            )
+
+        return FileResponse(f.name, media_type="audio/wav")
+
 
     @app.get("/version", tags=["その他"])
     def version() -> str:
