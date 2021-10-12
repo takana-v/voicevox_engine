@@ -98,3 +98,6 @@ class Speaker(BaseModel):
     speaker_uuid: str = Field(title="スピーカーのUUID")
     styles: List[SpeakerStyle] = Field(title="スピーカースタイルの一覧")
     version: str = Field("スピーカーのバージョン")
+
+class ReserveResponse(BaseModel):
+    reserve_id: int = Field(title="予約ID")

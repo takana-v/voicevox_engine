@@ -1,6 +1,8 @@
 import argparse
 import base64
 import io
+import multiprocessing
+import random
 import sys
 import zipfile
 from pathlib import Path
@@ -23,6 +25,7 @@ from voicevox_engine.model import (
     ParseKanaBadRequest,
     ParseKanaError,
     Speaker,
+    ReserveResponse,
 )
 from voicevox_engine.mora_list import openjtalk_mora2text
 from voicevox_engine.synthesis_engine import SynthesisEngine
@@ -104,6 +107,23 @@ def mora_to_text(mora: str):
     else:
         return mora
 
+
+def wrap_synthesis(args, query, speaker_id, con):
+    engine = make_synthesis_engine(
+        use_gpu=args.use_gpu,
+        voicevox_dir=args.voicevox_dir,
+        voicelib_dir=args.voicelib_dir,
+    )
+    try:
+        wave = engine.synthesis(query=query, speaker_id=speaker_id)
+        with NamedTemporaryFile(delete=False) as f:
+            soundfile.write(
+                file=f, data=wave, samplerate=query.outputSamplingRate, format="WAV"
+            )
+        con.send(f.name)
+    except Exception:
+        con.close()
+        raise
 
 def generate_app(engine: SynthesisEngine) -> FastAPI:
     root_dir = Path(__file__).parent
@@ -329,6 +349,70 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
         return FileResponse(f.name, media_type="audio/wav")
 
     @app.post(
+        "/reserve_synthesis",
+        response_model=ReserveResponse,
+        tags=["音声合成"],
+        summary="音声合成を予約する",
+    )
+    def reserve_synthesis(query: AudioQuery, speaker: int):
+        con1, con2 = multiprocessing.Pipe(False)
+        proc = multiprocessing.Process(target=wrap_synthesis, kwargs={"args":args, "query": query, "speaker_id": speaker, "con": con2}, daemon=True)
+        while True:
+            id = random.randint(0, 1000000)
+            if id not in processes.keys():
+                processes[id] = (proc, con1)
+                break
+        proc.start()
+        return ReserveResponse(reserve_id=id)
+
+    @app.post(
+        "/cancel_synthesis",
+        response_model=bool,
+        tags=["音声合成"],
+        summary="音声合成をキャンセルする",
+    )
+    def cancel_synthesis(reserve_id: int):
+        try:
+            proc, con = processes[reserve_id]
+        except Exception:
+            raise HTTPException(status_code=422, detail="予約が見つかりません")
+        con.close()
+        proc.terminate()
+        proc.join()
+        proc.close()
+        del processes[reserve_id]
+        return True
+
+    @app.post(
+        "/recv_synthesis",
+        response_class=FileResponse,
+        responses={
+            200: {
+                "content": {
+                    "audio/wav": {"schema": {"type": "string", "format": "binary"}}
+                },
+            }
+        },
+        tags=["音声合成"],
+        summary="予約済の音声合成データを受け取る",
+    )
+    def recv_synthesis(reserve_id: int):
+        try:
+            proc, con = processes[reserve_id]
+        except Exception:
+            raise HTTPException(status_code=422, detail="予約が見つかりません")
+        proc.join()
+        if proc.exitcode != 0:
+            raise HTTPException(status_code=422, detail="内部エラーが発生しました")
+        f_name = con.recv()
+        con.close()
+        proc.terminate()
+        proc.join()
+        proc.close()
+        del processes[reserve_id]
+        return FileResponse(f_name, media_type="audio/wav")
+
+    @app.post(
         "/multi_synthesis",
         response_class=FileResponse,
         responses={
@@ -422,6 +506,7 @@ if __name__ == "__main__":
     parser.add_argument("--voicevox_dir", type=Path, default=None)
     parser.add_argument("--voicelib_dir", type=Path, default=None)
     args = parser.parse_args()
+    processes = {}
     uvicorn.run(
         generate_app(
             make_synthesis_engine(
