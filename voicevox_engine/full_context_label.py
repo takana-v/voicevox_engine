@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 import pyopenjtalk
 
+pyopenjtalk.set_user_dict("user.dic")
 
 @dataclass
 class Phoneme:
