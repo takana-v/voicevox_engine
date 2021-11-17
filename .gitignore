@@ -19,3 +19,8 @@ venv/
 /cache
 
 /licenses.json
+
+dist
+run.spec
+*~
+models
