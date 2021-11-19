@@ -1,2 +1,0 @@
-git+https://git@github.com/shirowanisan/espnet@espnet-1.10.3
-parallel_wavegan==0.5.3
