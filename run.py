@@ -676,7 +676,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         generate_app(
-            SynthesisEngine(speakers={})
+            SynthesisEngine(speakers="{}")
         ),
         host=args.host,
         port=args.port,
