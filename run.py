@@ -5,6 +5,8 @@ import io
 import json
 import multiprocessing
 import os
+import sys
+import time
 import zipfile
 from functools import lru_cache
 from pathlib import Path
@@ -35,7 +37,8 @@ from voicevox_engine.model import (
     SpeakerInfo,
 )
 from voicevox_engine.mora_list import openjtalk_mora2text
-from voicevox_engine.synthesis_engine import SynthesisEngine, make_synthesis_engine
+
+from voicevox_engine.dev.coeiroink_engine import SynthesisEngine
 
 
 class PresetLoader:
@@ -265,6 +268,11 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
         クエリの初期値を得ます。ここで得られたクエリはそのまま音声合成に利用できます。各値の意味は`Schemas`を参照してください。
         """
         accent_phrases = create_accent_phrases(text, speaker_id=speaker)
+        end = ''
+        if text:
+            if text[-1] in ['?', '？']:
+                end = '？'
+
         return AudioQuery(
             accent_phrases=accent_phrases,
             speedScale=1,
@@ -275,7 +283,7 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
             postPhonemeLength=0.1,
             outputSamplingRate=default_sampling_rate,
             outputStereo=False,
-            kana=create_kana(accent_phrases),
+            kana=create_kana(accent_phrases)+end,
         )
 
     @app.post(
@@ -391,14 +399,18 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
         tags=["音声合成"],
         summary="音声合成する",
     )
-    def synthesis(query: AudioQuery, speaker: int):
-        wave = engine.synthesis(query=query, speaker_id=speaker)
+    async def synthesis(query: AudioQuery, speaker: int, text: str = ''):
+        start_time = time.time()
+
+        wave = engine.synthesis(query=query, speaker_id=speaker, text=text)
 
         with NamedTemporaryFile(delete=False) as f:
             soundfile.write(
                 file=f, data=wave, samplerate=query.outputSamplingRate, format="WAV"
             )
 
+        rtf = (time.time() - start_time)
+        print(f"Synthesis Time: {rtf}")
         return FileResponse(f.name, media_type="audio/wav")
 
     @app.post(
@@ -642,7 +654,7 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=50021)
+    parser.add_argument("--port", type=int, default=50031)
     parser.add_argument("--use_gpu", action="store_true")
     parser.add_argument("--voicevox_dir", type=Path, default=None)
     parser.add_argument("--voicelib_dir", type=Path, default=None)
@@ -664,11 +676,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         generate_app(
-            make_synthesis_engine(
-                use_gpu=args.use_gpu,
-                voicelib_dir=voicelib_dir,
-                voicevox_dir=args.voicevox_dir,
-            )
+            SynthesisEngine(speakers={})
         ),
         host=args.host,
         port=args.port,

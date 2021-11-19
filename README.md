@@ -285,6 +285,7 @@ python -m nuitka \
     run.py
 ```
 
+
 ## 依存関係の更新について
 
 pip-tools を用いて依存ライブラリのバージョンを固定しています。
@@ -294,6 +295,26 @@ pip-tools を用いて依存ライブラリのバージョンを固定してい�
 pip-compile requirements.in
 pip-compile requirements-dev.in
 pip-compile requirements-test.in
+
+## Build for COEIROINK
+
+```bash
+pip install --no-deps -r requirements-coeiroink-no-deps.txt
+pip install -r requirements-coeiroink.txt
+pip install -r requirements-dev.txt
+
+python generate_licenses.py > licenses.json
+
+pip install pyinstaller
+
+pyinstaller run.py
+
+mkdir dist/run/espnet
+cp venv/Lib/site-packages/espnet/version.txt dist/run/espnet/
+mkdir dist/run/librosa/util/example_data
+cp venv/Lib/site-packages/librosa/util/example_data/registry.txt dist/run/librosa/util/example_data/
+cp venv/Lib/site-packages/librosa/util/example_data/index.json dist/run/librosa/util/example_data/
+cp VERSION.txt dist/run/
 ```
 
 ## GitHub Actions
