@@ -269,6 +269,7 @@ python -m nuitka \
     --include-package=anyio \
     --include-package-data=pyopenjtalk \
     --include-package-data=scipy \
+    --include-package-data=pyworld \
     --include-data-file=VERSION.txt=./ \
     --include-data-file=licenses.json=./ \
     --include-data-file=presets.yaml=./ \

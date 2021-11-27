@@ -353,6 +353,7 @@ RUN <<EOF
                 --include-package=anyio \
                 --include-package-data=pyopenjtalk \
                 --include-package-data=scipy \
+                --include-package-data=pyworld \
                 --include-data-file=/opt/voicevox_engine/VERSION.txt=./ \
                 --include-data-file=/opt/voicevox_engine/licenses.json=./ \
                 --include-data-file=/opt/voicevox_engine/presets.yaml=./ \
