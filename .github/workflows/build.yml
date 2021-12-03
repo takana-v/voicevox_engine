@@ -421,6 +421,7 @@ jobs:
           artifact_name: windows-cpu
           nuitka_cache_path: nuitka_cache
           pip_cache_path: ~\AppData\Local\pip\Cache
+          c_compiler: mingw64
         # Windows NVIDIA GPU
         - os: windows-2019
           python: '3.8'
@@ -434,6 +435,7 @@ jobs:
           artifact_name: windows-nvidia
           nuitka_cache_path: nuitka_cache
           pip_cache_path: ~\AppData\Local\pip\Cache
+          c_compiler: msvc=14.2
 
     runs-on: ${{ matrix.os }}
 
@@ -441,6 +443,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup MSVC
+        if: matrix.artifact_name != windows-cpu
         uses: ilammy/msvc-dev-cmd@v1
 
       # Python install path: C:/hostedtoolcache/windows/Python
@@ -644,7 +647,7 @@ jobs:
             --include-data-file="VERSION.txt=./"
             --include-data-file="licenses.json=./"
             --include-data-dir="speaker_info=./speaker_info"
-            --msvc=14.2
+            --{{ matrix.c_compiler }}
             --follow-imports
             --no-prefer-source-code
             run.py
