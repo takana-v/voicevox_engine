@@ -443,7 +443,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup MSVC
-        if: matrix.artifact_name != windows-cpu
+        if: matrix.artifact_name != 'windows-cpu'
         uses: ilammy/msvc-dev-cmd@v1
 
       # Python install path: C:/hostedtoolcache/windows/Python
