@@ -646,7 +646,7 @@ jobs:
             --include-data-file="VERSION.txt=./"
             --include-data-file="licenses.json=./"
             --include-data-dir="speaker_info=./speaker_info"
-            --{{ matrix.c_compiler }}
+            --${{ matrix.c_compiler }}
             --follow-imports
             --no-prefer-source-code
             run.py
