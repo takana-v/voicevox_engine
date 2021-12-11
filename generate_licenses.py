@@ -183,6 +183,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/google/sentencepiece/master/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "editdistance":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/roy-ht/editdistance/master/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             elif license.name.lower() == "torch-complex":
                 with open('docs/licenses/torch_complex/for-torch-complex-license.txt') as f:
                     license.text = '\n'.join(f.readlines())
