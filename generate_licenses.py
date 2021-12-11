@@ -188,6 +188,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/roy-ht/editdistance/master/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "espnet-tts-frontend":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/espnet/espnet_tts_frontend/master/tacotron_cleaner/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             elif license.name.lower() == "torch-complex":
                 with open('docs/licenses/torch_complex/for-torch-complex-license.txt') as f:
                     license.text = '\n'.join(f.readlines())
