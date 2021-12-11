@@ -198,6 +198,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/nttcslab-sp/kaldiio/v2.17.2/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "matplotlib":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/matplotlib/matplotlib/v3.1.0/LICENSE/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             elif license.name.lower() == "torch-complex":
                 with open('docs/licenses/torch_complex/for-torch-complex-license.txt') as f:
                     license.text = '\n'.join(f.readlines())
