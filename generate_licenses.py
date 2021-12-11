@@ -213,6 +213,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/tensorflow/tensorboard/data-server-v0.6.1/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "tensorboard-plugin-wit":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/PAIR-code/what-if-tool/v1.8.0/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             elif license.name.lower() == "torch-complex":
                 with open('docs/licenses/torch_complex/for-torch-complex-license.txt') as f:
                     license.text = '\n'.join(f.readlines())
