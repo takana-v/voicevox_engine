@@ -203,6 +203,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/matplotlib/matplotlib/v3.1.0/LICENSE/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "protobuf":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/protocolbuffers/protobuf/v3.19.1/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             elif license.name.lower() == "torch-complex":
                 with open('docs/licenses/torch_complex/for-torch-complex-license.txt') as f:
                     license.text = '\n'.join(f.readlines())
