@@ -8,5 +8,6 @@ scipy
 PyYAML
 pyworld
 parallel_wavegan==0.5.3
+torch==1.9.1
 git+https://github.com/Hiroshiba/pyopenjtalk@69e5f354634f98098113f9cac5a6ea736443f9c9#egg=pyopenjtalk
 git+https://git@github.com/shirowanisan/espnet@espnet-1.10.3
