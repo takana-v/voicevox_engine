@@ -305,6 +305,20 @@ pip-compile requirements-dev.in
 pip-compile requirements-test.in
 ```
 
+## Build for COEIROINK
+
+```bash
+pip install -r requirements-dev.txt
+python generate_licenses.py > licenses.json
+pyinstaller run.py
+mkdir dist/run/espnet
+cp venv/Lib/site-packages/espnet/version.txt dist/run/espnet/
+mkdir dist/run/librosa/util/example_data
+cp venv/Lib/site-packages/librosa/util/example_data/registry.txt dist/run/librosa/util/example_data/
+cp venv/Lib/site-packages/librosa/util/example_data/index.json dist/run/librosa/util/example_data/
+cp VERSION.txt dist/run/
+```
+
 ## GitHub Actions
 
 ### Secrets
