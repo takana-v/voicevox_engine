@@ -4,59 +4,347 @@
 #
 #    pip-compile requirements.in
 #
+absl-py==1.0.0
+    # via tensorboard
 aiofiles==0.7.0
     # via -r requirements.in
 anyio==3.3.4
     # via starlette
+appdirs==1.4.4
+    # via pooch
+argcomplete==1.12.3
+    # via yq
 asgiref==3.4.1
     # via uvicorn
+audioread==2.1.9
+    # via librosa
+beautifulsoup4==4.10.0
+    # via gdown
+bottleneck==1.3.2
+    # via nara-wpe
+cachetools==4.2.4
+    # via google-auth
+certifi==2021.10.8
+    # via
+    #   requests
+    #   sentry-sdk
 cffi==1.15.0
     # via soundfile
+charset-normalizer==2.0.9
+    # via requests
+ci-sdr==0.0.0
+    # via espnet
 click==8.0.3
-    # via uvicorn
-colorama==0.4.4
-    # via click
+    # via
+    #   nara-wpe
+    #   nltk
+    #   uvicorn
+    #   wandb
+configargparse==1.5.3
+    # via espnet
+configparser==5.2.0
+    # via wandb
+ctc-segmentation==1.7.1
+    # via espnet
+cycler==0.11.0
+    # via matplotlib
 cython==0.29.24
     # via
+    #   ctc-segmentation
     #   pyopenjtalk
     #   pyworld
+decorator==5.1.0
+    # via librosa
+distance==0.1.3
+    # via g2p-en
+docker-pycreds==0.4.0
+    # via wandb
+editdistance==0.5.2
+    # via espnet
+einops==0.3.2
+    # via ci-sdr
+espnet @ git+https://git@github.com/shirowanisan/espnet@espnet-1.10.3
+    # via -r requirements.in
+espnet-tts-frontend==0.0.3
+    # via espnet
 fastapi==0.70.0
     # via -r requirements.in
+filelock==3.4.0
+    # via
+    #   espnet
+    #   gdown
+    #   parallel-wavegan
+g2p-en==2.1.0
+    # via espnet-tts-frontend
+gdown==4.2.0
+    # via parallel-wavegan
+gitdb==4.0.9
+    # via gitpython
+gitpython==3.1.24
+    # via wandb
+google-auth==2.3.3
+    # via
+    #   google-auth-oauthlib
+    #   tensorboard
+google-auth-oauthlib==0.4.6
+    # via tensorboard
+grpcio==1.42.0
+    # via tensorboard
 h11==0.12.0
     # via uvicorn
+h5py==3.6.0
+    # via
+    #   espnet
+    #   parallel-wavegan
+humanfriendly==10.0
+    # via espnet
 idna==3.3
-    # via anyio
+    # via
+    #   anyio
+    #   requests
+importlib-metadata==4.8.2
+    # via markdown
+inflect==5.3.0
+    # via
+    #   espnet-tts-frontend
+    #   g2p-en
+jaconv==0.3
+    # via espnet-tts-frontend
+joblib==1.1.0
+    # via
+    #   librosa
+    #   nltk
+    #   scikit-learn
+kaldiio==2.17.2
+    # via
+    #   espnet
+    #   parallel-wavegan
+kiwisolver==1.3.2
+    # via matplotlib
+librosa==0.8.1
+    # via
+    #   espnet
+    #   parallel-wavegan
+llvmlite==0.37.0
+    # via numba
+markdown==3.3.6
+    # via tensorboard
+matplotlib==3.1.0
+    # via
+    #   espnet
+    #   parallel-wavegan
+nara-wpe==0.0.7
+    # via espnet
+nltk==3.6.5
+    # via
+    #   espnet
+    #   g2p-en
+numba==0.54.1
+    # via
+    #   librosa
+    #   resampy
 numpy==1.20.0
     # via
     #   -r requirements.in
+    #   bottleneck
+    #   ci-sdr
+    #   ctc-segmentation
+    #   g2p-en
+    #   h5py
+    #   kaldiio
+    #   librosa
+    #   matplotlib
+    #   nara-wpe
+    #   numba
     #   pyopenjtalk
+    #   pytorch-wpe
     #   pyworld
+    #   resampy
+    #   scikit-learn
     #   scipy
+    #   tensorboard
+    #   tensorboardx
+    #   torch-complex
+oauthlib==3.1.1
+    # via requests-oauthlib
+packaging==21.3
+    # via
+    #   librosa
+    #   pooch
+parallel_wavegan==0.5.3
+    # via -r requirements.in
+pathtools==0.1.2
+    # via wandb
+pillow==8.4.0
+    # via espnet
+pooch==1.5.2
+    # via librosa
+promise==2.3
+    # via wandb
+protobuf==3.19.1
+    # via
+    #   tensorboard
+    #   tensorboardx
+    #   wandb
+psutil==5.8.0
+    # via wandb
+pyasn1==0.4.8
+    # via
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.2.8
+    # via google-auth
 pycparser==2.20
     # via cffi
 pydantic==1.8.2
     # via fastapi
 pyopenjtalk @ git+https://github.com/Hiroshiba/pyopenjtalk@69e5f354634f98098113f9cac5a6ea736443f9c9
     # via -r requirements.in
+pyparsing==3.0.6
+    # via
+    #   matplotlib
+    #   packaging
+pypinyin==0.44.0
+    # via espnet-tts-frontend
+pysocks==1.7.1
+    # via requests
+python-dateutil==2.8.2
+    # via
+    #   matplotlib
+    #   wandb
 python-multipart==0.0.5
     # via -r requirements.in
+pytorch-wpe==0.0.1
+    # via espnet
 pyworld==0.3.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   espnet
 pyyaml==6.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   espnet
+    #   parallel-wavegan
+    #   wandb
+    #   yq
+regex==2021.11.10
+    # via nltk
+requests[socks]==2.26.0
+    # via
+    #   gdown
+    #   pooch
+    #   requests-oauthlib
+    #   tensorboard
+    #   wandb
+requests-oauthlib==1.3.0
+    # via google-auth-oauthlib
+resampy==0.2.2
+    # via librosa
+rsa==4.8
+    # via google-auth
+scikit-learn==1.0.1
+    # via librosa
 scipy==1.7.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   ci-sdr
+    #   espnet
+    #   librosa
+    #   resampy
+    #   scikit-learn
+sentencepiece==0.1.96
+    # via espnet
+sentry-sdk==1.5.0
+    # via wandb
+shortuuid==1.0.8
+    # via wandb
 six==1.16.0
     # via
+    #   absl-py
+    #   docker-pycreds
+    #   gdown
+    #   google-auth
+    #   grpcio
+    #   promise
     #   pyopenjtalk
+    #   python-dateutil
     #   python-multipart
+    #   resampy
+    #   wandb
+smmap==5.0.0
+    # via gitdb
 sniffio==1.2.0
     # via anyio
 soundfile==0.10.3.post1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   espnet
+    #   librosa
+    #   nara-wpe
+    #   parallel-wavegan
+soupsieve==2.3.1
+    # via beautifulsoup4
 starlette==0.16.0
     # via fastapi
+subprocess32==3.5.4
+    # via wandb
+tensorboard==2.7.0
+    # via espnet
+tensorboard-data-server==0.6.1
+    # via tensorboard
+tensorboard-plugin-wit==1.8.0
+    # via tensorboard
+tensorboardx==2.4.1
+    # via
+    #   espnet
+    #   parallel-wavegan
+termcolor==1.1.0
+    # via yaspin
+threadpoolctl==3.0.0
+    # via scikit-learn
+toml==0.10.2
+    # via yq
+torch==1.10.0
+    # via
+    #   ci-sdr
+    #   parallel-wavegan
+torch-complex==0.2.1
+    # via espnet
+tqdm==4.62.3
+    # via
+    #   gdown
+    #   nara-wpe
+    #   nltk
+    #   parallel-wavegan
+typeguard==2.13.3
+    # via espnet
 typing-extensions==3.10.0.2
-    # via pydantic
+    # via
+    #   gitpython
+    #   pydantic
+    #   torch
+unidecode==1.3.2
+    # via espnet-tts-frontend
+urllib3==1.26.7
+    # via
+    #   requests
+    #   sentry-sdk
 uvicorn==0.15.0
     # via -r requirements.in
+wandb==0.12.7
+    # via espnet
+werkzeug==2.0.2
+    # via tensorboard
+wheel==0.37.0
+    # via tensorboard
+xmltodict==0.12.0
+    # via yq
+yaspin==2.1.0
+    # via wandb
+yq==2.13.0
+    # via parallel-wavegan
+zipp==3.6.0
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
