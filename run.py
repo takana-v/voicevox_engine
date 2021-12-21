@@ -234,7 +234,9 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音高・音素長を得る",
     )
-    def mora_data(accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False):
+    def mora_data(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
         if use_old_core:
             return old_core_engine.replace_mora_data(accent_phrases, speaker_id=speaker)
         else:
@@ -246,7 +248,9 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音素長を得る",
     )
-    def mora_length(accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False):
+    def mora_length(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
         if use_old_core:
             return old_core_engine.replace_phoneme_length(
                 accent_phrases=accent_phrases, speaker_id=speaker
@@ -262,7 +266,9 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音高を得る",
     )
-    def mora_pitch(accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False):
+    def mora_pitch(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
         if use_old_core:
             return old_core_engine.replace_mora_pitch(
                 accent_phrases=accent_phrases, speaker_id=speaker
@@ -338,7 +344,9 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["音声合成"],
         summary="複数まとめて音声合成する",
     )
-    def multi_synthesis(queries: List[AudioQuery], speaker: int, use_old_core: bool = False):
+    def multi_synthesis(
+        queries: List[AudioQuery], speaker: int, use_old_core: bool = False
+    ):
         sampling_rate = queries[0].outputSamplingRate
 
         with NamedTemporaryFile(delete=False) as f:
@@ -354,9 +362,13 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
 
                     with TemporaryFile() as wav_file:
                         if use_old_core:
-                            wave = old_core_engine.synthesis(query=queries[i], speaker_id=speaker)
+                            wave = old_core_engine.synthesis(
+                                query=queries[i], speaker_id=speaker
+                            )
                         else:
-                            wave = engine.synthesis(query=queries[i], speaker_id=speaker)
+                            wave = engine.synthesis(
+                                query=queries[i], speaker_id=speaker
+                            )
                         soundfile.write(
                             file=wav_file,
                             data=wave,
