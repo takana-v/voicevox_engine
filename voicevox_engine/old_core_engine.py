@@ -14,20 +14,22 @@ def engine_process(
     libtorch_dir: Path,
     conn: Connection,
 ):
+    abs_libtorch_dir = str(libtorch_dir.resolve())
+    abs_old_voicelib_dir = str(old_voicelib_dir.resolve())
     try:
         if sys.platform == "win32":
-            os.add_dll_directory(str(libtorch_dir.resolve()))
-            os.add_dll_directory(str(old_voicelib_dir.resolve()))
+            os.add_dll_directory(abs_libtorch_dir)
+            os.add_dll_directory(abs_old_voicelib_dir)
         elif sys.platform == "linux" or sys.platform == "darwin":
             os.environ["LD_LIBRARY_PATH"] = (
-                str(libtorch_dir.resolve()) + ":" + str(old_voicelib_dir.resolve())
+                abs_libtorch_dir + ":" + abs_old_voicelib_dir
             )
         else:
             raise RuntimeError("Unsupported OS")
-        sys.path.insert(0, str(old_voicelib_dir.resolve()))
+        sys.path.insert(0, abs_old_voicelib_dir)
         import core
 
-        core.initialize(str(old_voicelib_dir.resolve()), use_gpu)
+        core.initialize(abs_old_voicelib_dir, use_gpu)
         synthesis_engine = SynthesisEngine(
             yukarin_s_forwarder=core.yukarin_s_forward,
             yukarin_sa_forwarder=core.yukarin_sa_forward,
@@ -128,14 +130,20 @@ def make_old_core_engine(
     voicevox_dir: Path,
     libtorch_dir: Path,
 ) -> OldCoreEngine:
+    if sys.platform == "win32":
+        core_module_name = "core.pyd"
+    elif sys.platform == "linux":
+        core_module_name = "core.so"
+    elif sys.platform == "darwin":
+        core_module_name = "core.dylib" # not tested
     if old_voicelib_dir is None or libtorch_dir is None:
         raise RuntimeError("old_voicelib_dirとlibtorch_dirの指定が必要です")
     if voicevox_dir is None:
         voicevox_dir = Path("")
-    if not (old_voicelib_dir / "core.pyd").is_file():
-        if not (voicevox_dir / "core.pyd").is_file():
+    if not (old_voicelib_dir / core_module_name).is_file():
+        if not (voicevox_dir / core_module_name).is_file():
             raise RuntimeError("コアモジュールのファイルが見つかりません")
         shutil.copyfile(
-            str(voicevox_dir / "core.pyd"), str(old_voicelib_dir / "core.pyd")
+            str(voicevox_dir / core_module_name), str(old_voicelib_dir / core_module_name)
         )
     return OldCoreEngine(use_gpu, old_voicelib_dir, libtorch_dir)
