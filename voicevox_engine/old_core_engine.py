@@ -136,7 +136,7 @@ def make_old_core_engine(
     elif sys.platform == "linux":
         core_module_name = "core.so"
     elif sys.platform == "darwin":
-        core_module_name = "core.dylib" # not tested
+        core_module_name = "core.dylib"  # not tested
     if old_voicelib_dir is None or libtorch_dir is None:
         raise RuntimeError("old_voicelib_dirとlibtorch_dirの指定が必要です")
     if voicevox_dir is None:
@@ -145,6 +145,7 @@ def make_old_core_engine(
         if not (voicevox_dir / core_module_name).is_file():
             raise RuntimeError("コアモジュールのファイルが見つかりません")
         shutil.copyfile(
-            str(voicevox_dir / core_module_name), str(old_voicelib_dir / core_module_name)
+            str(voicevox_dir / core_module_name),
+            str(old_voicelib_dir / core_module_name),
         )
     return OldCoreEngine(use_gpu, old_voicelib_dir, libtorch_dir)
