@@ -16,6 +16,7 @@ def engine_process(
 ):
     abs_libtorch_dir = str(libtorch_dir.resolve())
     abs_old_voicelib_dir = str(old_voicelib_dir.resolve())
+    os.chdir(abs_old_voicelib_dir)
     try:
         if sys.platform == "win32":
             os.add_dll_directory(abs_libtorch_dir)
