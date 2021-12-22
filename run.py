@@ -97,6 +97,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         クエリの初期値を得ます。ここで得られたクエリはそのまま音声合成に利用できます。各値の意味は`Schemas`を参照してください。
         """
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             accent_phrases = old_core_engine.create_accent_phrases(
                 text,
                 speaker_id=speaker,
@@ -147,6 +149,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
             raise HTTPException(status_code=422, detail="該当するプリセットIDが見つかりません")
 
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             accent_phrases = old_core_engine.create_accent_phrases(
                 text,
                 speaker_id=selected_preset.style_id,
@@ -207,6 +211,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
                     detail=ParseKanaBadRequest(err).dict(),
                 )
             if use_old_core:
+                if old_core_engine is None:
+                    raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
                 return old_core_engine.replace_mora_data(
                     accent_phrases=accent_phrases, speaker_id=speaker
                 )
@@ -216,6 +222,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
                 )
         else:
             if use_old_core:
+                if old_core_engine is None:
+                    raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
                 return old_core_engine.create_accent_phrases(
                     text,
                     speaker_id=speaker,
@@ -238,6 +246,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
     ):
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             return old_core_engine.replace_mora_data(accent_phrases, speaker_id=speaker)
         else:
             return engine.replace_mora_data(accent_phrases, speaker_id=speaker)
@@ -252,6 +262,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
     ):
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             return old_core_engine.replace_phoneme_length(
                 accent_phrases=accent_phrases, speaker_id=speaker
             )
@@ -270,6 +282,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
     ):
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             return old_core_engine.replace_mora_pitch(
                 accent_phrases=accent_phrases, speaker_id=speaker
             )
@@ -293,6 +307,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
     )
     def synthesis(query: AudioQuery, speaker: int, use_old_core: bool = False):
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             wave = old_core_engine.synthesis(query=query, speaker_id=speaker)
         else:
             wave = engine.synthesis(query=query, speaker_id=speaker)
@@ -407,6 +423,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
 
         # 生成したパラメータはキャッシュされる
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             morph_param = synthesis_morphing_parameter(
                 engine=old_core_engine,
                 query=query,
@@ -491,6 +509,8 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
     @app.get("/speakers", response_model=List[Speaker], tags=["その他"])
     def speakers(use_old_core: bool = False):
         if use_old_core:
+            if old_core_engine is None:
+                raise HTTPException(status_code=422, detail="過去バージョンのエンジンが見つかりません")
             return Response(
                 content=old_core_engine.speakers,
                 media_type="application/json",
