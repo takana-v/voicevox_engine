@@ -27,7 +27,7 @@ def engine_process(
             )
         else:
             raise RuntimeError("Unsupported OS")
-        sys.path.insert(0, abs_old_voicelib_dir)
+        sys.path = [abs_old_voicelib_dir]
         import core
 
         core.initialize(abs_old_voicelib_dir, use_gpu)
