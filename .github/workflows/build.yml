@@ -218,6 +218,7 @@ jobs:
             --output-dir=./ \
             --standalone \
             --plugin-enable=numpy \
+            --plugin-enable=multiprocessing \
             --follow-import-to=numpy \
             --follow-import-to=aiofiles \
             --include-package=uvicorn \
@@ -635,6 +636,7 @@ jobs:
             --standalone
             --assume-yes-for-downloads
             --plugin-enable=numpy
+            --plugin-enable=multiprocessing
             --follow-import-to=numpy
             --follow-import-to=aiofiles
             --include-package=uvicorn
