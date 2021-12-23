@@ -31,7 +31,11 @@ from voicevox_engine.morphing import (
     synthesis_morphing_parameter as _synthesis_morphing_parameter,
 )
 from voicevox_engine.preset import Preset, PresetLoader
-from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engine
+from voicevox_engine.synthesis_engine import (
+    SynthesisEngineBase,
+    make_old_synthesis_engine,
+    make_synthesis_engine,
+)
 from voicevox_engine.utility import ConnectBase64WavesException, connect_base64_waves
 
 
@@ -39,10 +43,10 @@ def b64encode_str(s):
     return base64.b64encode(s).decode("utf-8")
 
 
-def generate_app(engine: SynthesisEngineBase) -> FastAPI:
+def generate_app(latest_engine: SynthesisEngineBase) -> FastAPI:
     root_dir = Path(__file__).parent
 
-    default_sampling_rate = engine.default_sampling_rate
+    default_sampling_rate = latest_engine.default_sampling_rate
 
     app = FastAPI(
         title="VOICEVOX ENGINE",
@@ -89,10 +93,17 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         text: str,
         speaker: int,
         enable_interrogative: bool = enable_interrogative_query_param(),  # noqa B008,
+        use_old_core: bool = False,
     ):
         """
         クエリの初期値を得ます。ここで得られたクエリはそのまま音声合成に利用できます。各値の意味は`Schemas`を参照してください。
         """
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         accent_phrases = engine.create_accent_phrases(
             text,
             speaker_id=speaker,
@@ -121,10 +132,17 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         text: str,
         preset_id: int,
         enable_interrogative: bool = enable_interrogative_query_param(),  # noqa B008,
+        use_old_core: bool = False,
     ):
         """
         クエリの初期値を得ます。ここで得られたクエリはそのまま音声合成に利用できます。各値の意味は`Schemas`を参照してください。
         """
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         presets, err_detail = preset_loader.load_presets()
         if err_detail:
             raise HTTPException(status_code=422, detail=err_detail)
@@ -170,6 +188,7 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         speaker: int,
         is_kana: bool = False,
         enable_interrogative: bool = enable_interrogative_query_param(),  # noqa B008,
+        use_old_core: bool = False,
     ):
         """
         テキストからアクセント句を得ます。
@@ -179,6 +198,12 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         * カナの手前に`_`を入れるとそのカナは無声化される
         * アクセント位置を`'`で指定する。全てのアクセント句にはアクセント位置を1つ指定する必要がある。
         """
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         if is_kana:
             try:
                 accent_phrases = parse_kana(text)
@@ -203,7 +228,15 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音高・音素長を得る",
     )
-    def mora_data(accent_phrases: List[AccentPhrase], speaker: int):
+    def mora_data(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         return engine.replace_mora_data(accent_phrases, speaker_id=speaker)
 
     @app.post(
@@ -212,7 +245,15 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音素長を得る",
     )
-    def mora_length(accent_phrases: List[AccentPhrase], speaker: int):
+    def mora_length(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         return engine.replace_phoneme_length(
             accent_phrases=accent_phrases, speaker_id=speaker
         )
@@ -223,7 +264,15 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["クエリ編集"],
         summary="アクセント句から音高を得る",
     )
-    def mora_pitch(accent_phrases: List[AccentPhrase], speaker: int):
+    def mora_pitch(
+        accent_phrases: List[AccentPhrase], speaker: int, use_old_core: bool = False
+    ):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         return engine.replace_mora_pitch(
             accent_phrases=accent_phrases, speaker_id=speaker
         )
@@ -241,7 +290,13 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["音声合成"],
         summary="音声合成する",
     )
-    def synthesis(query: AudioQuery, speaker: int):
+    def synthesis(query: AudioQuery, speaker: int, use_old_core: bool = False):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         wave = engine.synthesis(query=query, speaker_id=speaker)
 
         with NamedTemporaryFile(delete=False) as f:
@@ -291,7 +346,15 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         tags=["音声合成"],
         summary="複数まとめて音声合成する",
     )
-    def multi_synthesis(queries: List[AudioQuery], speaker: int):
+    def multi_synthesis(
+        queries: List[AudioQuery], speaker: int, use_old_core: bool = False
+    ):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         sampling_rate = queries[0].outputSamplingRate
 
         with NamedTemporaryFile(delete=False) as f:
@@ -337,11 +400,18 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         base_speaker: int,
         target_speaker: int,
         morph_rate: float = Query(..., ge=0.0, le=1.0),  # noqa: B008
+        use_old_core: bool = False,
     ):
         """
         指定された2人の話者で音声を合成、指定した割合でモーフィングした音声を得ます。
         モーフィングの割合は`morph_rate`で指定でき、0.0でベースの話者、1.0でターゲットの話者に近づきます。
         """
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
 
         # 生成したパラメータはキャッシュされる
         morph_param = synthesis_morphing_parameter(
@@ -419,7 +489,13 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         return (root_dir / "VERSION.txt").read_text()
 
     @app.get("/speakers", response_model=List[Speaker], tags=["その他"])
-    def speakers():
+    def speakers(use_old_core: bool = False):
+        if use_old_core:
+            if old_engine is None:
+                raise HTTPException(status_code=422, detail="古いバージョンのコアは利用可能ではありません")
+            engine = old_engine
+        else:
+            engine = latest_engine
         return Response(
             content=engine.speakers,
             media_type="application/json",
@@ -435,7 +511,7 @@ def generate_app(engine: SynthesisEngineBase) -> FastAPI:
         -------
         ret_data: SpeakerInfo
         """
-        speakers = json.loads(engine.speakers)
+        speakers = json.loads(latest_engine.speakers)
         for i in range(len(speakers)):
             if speakers[i]["speaker_uuid"] == speaker_uuid:
                 speaker = speakers[i]
@@ -489,6 +565,8 @@ if __name__ == "__main__":
     parser.add_argument("--voicelib_dir", type=Path, default=None)
     parser.add_argument("--enable_cancellable_synthesis", action="store_true")
     parser.add_argument("--init_processes", type=int, default=2)
+    parser.add_argument("--old_voicelib_dir", type=Path, default=None)
+    parser.add_argument("--libtorch_dir", type=Path, default=None)
     args = parser.parse_args()
 
     # voicelib_dir が Noneのとき、音声ライブラリの Python モジュールと同じディレクトリにあるとする
@@ -502,6 +580,14 @@ if __name__ == "__main__":
     cancellable_engine = None
     if args.enable_cancellable_synthesis:
         cancellable_engine = CancellableEngine(args, voicelib_dir)
+
+    old_engine = None
+    if args.old_voicelib_dir is not None and args.libtorch_dir is not None:
+        old_engine = make_old_synthesis_engine(
+            use_gpu=args.use_gpu,
+            old_voicelib_dir=args.old_voicelib_dir,
+            libtorch_dir=args.libtorch_dir,
+        )
 
     uvicorn.run(
         generate_app(
