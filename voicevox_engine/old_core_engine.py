@@ -30,6 +30,7 @@ def engine_process(
         sys.path = [abs_old_voicelib_dir]
         import core
 
+        print(f"old core location: {core.__path__}" )
         core.initialize(abs_old_voicelib_dir, use_gpu)
         synthesis_engine = SynthesisEngine(
             yukarin_s_forwarder=core.yukarin_s_forward,
