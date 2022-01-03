@@ -17,6 +17,9 @@ class Mora(BaseModel):
     モーラ（子音＋母音）ごとの情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     text: str = Field(title="文字")
     consonant: Optional[str] = Field(title="子音の音素")
     consonant_length: Optional[float] = Field(title="子音の音長")
@@ -37,6 +40,9 @@ class AccentPhrase(BaseModel):
     アクセント句ごとの情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     moras: List[Mora] = Field(title="モーラのリスト")
     accent: int = Field(title="アクセント箇所")
     pause_mora: Optional[Mora] = Field(title="後ろに無音を付けるかどうか")
@@ -53,6 +59,9 @@ class AudioQuery(BaseModel):
     """
     音声合成用のクエリ
     """
+
+    class Config:
+        arbitrary_types_allowed = True
 
     accent_phrases: List[AccentPhrase] = Field(title="アクセント句のリスト")
     speedScale: float = Field(title="全体の話速")

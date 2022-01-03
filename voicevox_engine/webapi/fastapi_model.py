@@ -20,6 +20,9 @@ class Mora(BaseModel):
     モーラ（子音＋母音）ごとの情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     text: str = Field(title="文字")
     consonant: Optional[str] = Field(title="子音の音素")
     consonant_length: Optional[float] = Field(title="子音の音長")
@@ -61,6 +64,9 @@ class AccentPhrase(BaseModel):
     アクセント句ごとの情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     moras: List[Mora] = Field(title="モーラのリスト")
     accent: int = Field(title="アクセント箇所")
     pause_mora: Optional[Mora] = Field(title="後ろに無音を付けるかどうか")
@@ -96,6 +102,9 @@ class AudioQuery(BaseModel):
     """
     音声合成用のクエリ
     """
+
+    class Config:
+        arbitrary_types_allowed = True
 
     accent_phrases: List[AccentPhrase] = Field(title="アクセント句のリスト")
     speedScale: float = Field(title="全体の話速")
@@ -151,6 +160,9 @@ class AudioQuery(BaseModel):
 
 
 class ParseKanaBadRequest(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     text: str = Field(title="エラーメッセージ")
     error_name: str = Field(
         title="エラー名",
@@ -173,6 +185,9 @@ class SpeakerStyle(BaseModel):
     スピーカーのスタイル情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     name: str = Field(title="スタイル名")
     id: int = Field(title="スタイルID")
 
@@ -194,6 +209,9 @@ class Speaker(BaseModel):
     """
     スピーカー情報
     """
+
+    class Config:
+        arbitrary_types_allowed = True
 
     name: str = Field(title="名前")
     speaker_uuid: str = Field(title="スピーカーのUUID")
@@ -223,6 +241,9 @@ class StyleInfo(BaseModel):
     スタイルの追加情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     id: int = Field(title="スタイルID")
     icon: str = Field(title="当該スタイルのアイコンをbase64エンコードしたもの")
     voice_samples: List[str] = Field(title="voice_sampleのwavファイルをbase64エンコードしたもの")
@@ -248,6 +269,9 @@ class SpeakerInfo(BaseModel):
     話者の追加情報
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     policy: str = Field(title="policy.md")
     portrait: str = Field(title="portrait.pngをbase64エンコードしたもの")
     style_infos: List[StyleInfo] = Field(title="スタイルの追加情報")
@@ -272,6 +296,9 @@ class Preset(BaseModel):
     """
     プリセット情報
     """
+
+    class Config:
+        arbitrary_types_allowed = True
 
     id: int = Field(title="プリセットID")
     name: str = Field(title="プリセット名")
