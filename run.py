@@ -628,6 +628,7 @@ if __name__ == "__main__":
     parser.add_argument("--use_gpu", action="store_true")
     parser.add_argument("--voicevox_dir", type=Path, default=None)
     parser.add_argument("--voicelib_dir", type=Path, default=None)
+    parser.add_argument("--model_lib_dir", type=Path, default=None)
     parser.add_argument("--enable_cancellable_synthesis", action="store_true")
     parser.add_argument("--init_processes", type=int, default=2)
     parser.add_argument("--old_voicelib_dir", type=Path, default=None)
@@ -664,6 +665,7 @@ if __name__ == "__main__":
                 use_gpu=args.use_gpu,
                 voicelib_dir=voicelib_dir,
                 voicevox_dir=args.voicevox_dir,
+                model_lib_dir=args.model_lib_dir,
             )
         ),
         host=args.host,
