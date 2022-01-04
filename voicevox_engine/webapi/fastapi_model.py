@@ -31,6 +31,8 @@ class Mora(BaseModel):
     pitch: float = Field(title="音高")  # デフォルト値をつけるとts側のOpenAPIで生成されたコードの型がOptionalになる
 
     def __hash__(self):
+        class Config:
+            arbitrary_types_allowed = True
         items = [
             (k, tuple(v)) if isinstance(v, List) else (k, v)
             for k, v in self.__dict__.items()
@@ -39,6 +41,8 @@ class Mora(BaseModel):
 
     @classmethod
     def from_engine(cls, mora: model.Mora) -> Mora:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             text=mora.text,
             consonant=mora.consonant,
@@ -49,6 +53,8 @@ class Mora(BaseModel):
         )
 
     def to_engine(self) -> model.Mora:
+        class Config:
+            arbitrary_types_allowed = True
         return model.Mora(
             text=self.text,
             consonant=self.consonant,
@@ -72,6 +78,8 @@ class AccentPhrase(BaseModel):
     pause_mora: Optional[Mora] = Field(title="後ろに無音を付けるかどうか")
 
     def __hash__(self):
+        class Config:
+            arbitrary_types_allowed = True
         items = [
             (k, tuple(v)) if isinstance(v, List) else (k, v)
             for k, v in self.__dict__.items()
@@ -80,6 +88,8 @@ class AccentPhrase(BaseModel):
 
     @classmethod
     def from_engine(cls, accent_phrase: model.AccentPhrase) -> AccentPhrase:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             moras=[Mora.from_engine(mora) for mora in accent_phrase.moras],
             accent=accent_phrase.accent,
@@ -89,6 +99,8 @@ class AccentPhrase(BaseModel):
         )
 
     def to_engine(self) -> model.AccentPhrase:
+        class Config:
+            arbitrary_types_allowed = True
         return model.AccentPhrase(
             moras=[mora.to_engine() for mora in self.moras],
             accent=self.accent,
@@ -118,6 +130,8 @@ class AudioQuery(BaseModel):
     kana: Optional[str] = Field(title="[読み取り専用]AquesTalkライクな読み仮名。音声合成クエリとしては無視される")
 
     def __hash__(self):
+        class Config:
+            arbitrary_types_allowed = True
         items = [
             (k, tuple(v)) if isinstance(v, List) else (k, v)
             for k, v in self.__dict__.items()
@@ -126,6 +140,8 @@ class AudioQuery(BaseModel):
 
     @classmethod
     def from_engine(cls, audio_query: model.AudioQuery) -> AudioQuery:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             accent_phrases=[
                 AccentPhrase.from_engine(accent_phrase)
@@ -143,6 +159,8 @@ class AudioQuery(BaseModel):
         )
 
     def to_engine(self) -> model.AudioQuery:
+        class Config:
+            arbitrary_types_allowed = True
         return model.AudioQuery(
             accent_phrases=[
                 accent_phrase.to_engine() for accent_phrase in self.accent_phrases
@@ -177,6 +195,8 @@ class ParseKanaBadRequest(BaseModel):
     error_args: Dict[str, str] = Field(title="エラーを起こした箇所")
 
     def __init__(self, err: model.ParseKanaError):
+        class Config:
+            arbitrary_types_allowed = True
         super().__init__(text=err.text, error_name=err.errname, error_args=err.kwargs)
 
 
@@ -193,12 +213,16 @@ class SpeakerStyle(BaseModel):
 
     @classmethod
     def from_engine(cls, speaker_style: model.SpeakerStyle) -> SpeakerStyle:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             name=speaker_style.name,
             id=speaker_style.id,
         )
 
     def to_engine(self) -> model.SpeakerStyle:
+        class Config:
+            arbitrary_types_allowed = True
         return model.SpeakerStyle(
             name=self.name,
             id=self.id,
@@ -220,6 +244,8 @@ class Speaker(BaseModel):
 
     @classmethod
     def from_engine(cls, speaker: model.Speaker) -> Speaker:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             name=speaker.name,
             speaker_uuid=speaker.speaker_uuid,
@@ -228,6 +254,8 @@ class Speaker(BaseModel):
         )
 
     def to_engine(self) -> model.Speaker:
+        class Config:
+            arbitrary_types_allowed = True
         return model.Speaker(
             name=self.name,
             speaker_uuid=self.speaker_uuid,
@@ -250,6 +278,8 @@ class StyleInfo(BaseModel):
 
     @classmethod
     def from_engine(cls, style_info: model.StyleInfo) -> StyleInfo:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             id=style_info.id,
             icon=style_info.icon,
@@ -257,6 +287,8 @@ class StyleInfo(BaseModel):
         )
 
     def to_engine(self) -> model.StyleInfo:
+        class Config:
+            arbitrary_types_allowed = True
         return model.StyleInfo(
             id=self.id,
             icon=self.icon,
@@ -278,6 +310,8 @@ class SpeakerInfo(BaseModel):
 
     @classmethod
     def from_engine(cls, speaker_info: model.SpeakerInfo) -> SpeakerInfo:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             policy=speaker_info.policy,
             portrait=speaker_info.portrait,
@@ -285,6 +319,8 @@ class SpeakerInfo(BaseModel):
         )
 
     def to_engine(self) -> model.SpeakerInfo:
+        class Config:
+            arbitrary_types_allowed = True
         return model.SpeakerInfo(
             policy=self.policy,
             portrait=self.portrait,
@@ -313,6 +349,8 @@ class Preset(BaseModel):
 
     @classmethod
     def from_engine(cls, preset: preset.Preset) -> Preset:
+        class Config:
+            arbitrary_types_allowed = True
         return cls(
             id=preset.id,
             name=preset.name,
@@ -327,6 +365,8 @@ class Preset(BaseModel):
         )
 
     def to_engine(self) -> preset.Preset:
+        class Config:
+            arbitrary_types_allowed = True
         return preset.Preset(
             id=self.id,
             name=self.name,
