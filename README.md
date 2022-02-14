@@ -1,3 +1,42 @@
+# VOICEVOX ENGINE For ESPNET
+ESPNETを使った音声合成モデル向けのVOICEVOX ENGINEのテンプレート  
+試す際は以下を差し替える  
+- run.py
+  - 一番最後辺り speakers_settings
+    - 配布する際はuuidを必ずユニークな物にする
+    - stylesの中のidは一意になるように
+    - その他は雰囲気で
+- speaker_info以下
+  - フォルダ名は先ほどのuuid
+  - ファイル名の数字は先ほどのid
+    - icons/ キャラ選択の小さいアイコン
+    - voice_samples/ 初回起動時の試聴音源
+    - policy.md 利用規約
+    - portrait.png 左側のキャラ立ち絵
+
+必要に応じて`voicevox_engine/synthesis_engine/synthesis_engine_espnet.py`及び`voicevox_engine/synthesis_engine/make_synthesis_engines.py`を書き換える
+
+## 起動方法
+```bash
+python -m pip install -r requirements.txt
+python run.py
+```
+先にVOICEVOX ENGINEを起動してから製品版VOICEVOX（0.10）を起動する  
+起動後に「音声合成エンジンエラー」と出るが無視する
+
+## その他
+
+- 一部機能が無効になっている
+  - ex) モーフィング機能、キャンセル可能な音声合成
+- UI側に一部不具合がある
+  - ex) 再生位置（音素ごとの長さを推定できないため）
+- ビルド周り未対応
+- 今後のVOICEVOX本体のプラグイン機能の実装によってこのままでは使えなくなる可能性が高い
+- VOICEVOX（エディタ側）の設定ファイルがおかしくなる可能性あり
+  - %appdata%/voicevox(-cpu)を消すと直るはず
+- 疑似疑問文はデフォルトでオフに変更されている
+
+
 # VOICEVOX ENGINE
 
 [![build](https://github.com/VOICEVOX/voicevox_engine/actions/workflows/build.yml/badge.svg)](https://github.com/VOICEVOX/voicevox_engine/actions/workflows/build.yml)

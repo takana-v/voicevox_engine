@@ -1,27 +1,20 @@
 import argparse
-
-# import asyncio
 import base64
 import json
-import multiprocessing
-import os
-
-# import sys
 import zipfile
 from distutils.version import LooseVersion
-from functools import lru_cache
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryFile
 from typing import Dict, List, Optional
 
 import soundfile
 import uvicorn
+import yaml
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.params import Query
 from starlette.responses import FileResponse
 
-# from voicevox_engine.cancellable_engine import CancellableEngine
 from voicevox_engine import __version__
 from voicevox_engine.kana_parser import create_kana, parse_kana
 from voicevox_engine.model import (
@@ -32,10 +25,6 @@ from voicevox_engine.model import (
     Speaker,
     SpeakerInfo,
     SupportedDevicesInfo,
-)
-from voicevox_engine.morphing import synthesis_morphing
-from voicevox_engine.morphing import (
-    synthesis_morphing_parameter as _synthesis_morphing_parameter,
 )
 from voicevox_engine.preset import Preset, PresetLoader
 from voicevox_engine.synthesis_engine import SynthesisEngineBase, make_synthesis_engines
@@ -70,11 +59,6 @@ def generate_app(
     preset_loader = PresetLoader(
         preset_path=root_dir / "presets.yaml",
     )
-
-    # キャッシュを有効化
-    # モジュール側でlru_cacheを指定するとキャッシュを制御しにくいため、HTTPサーバ側で指定する
-    # TODO: キャッシュを管理するモジュール側API・HTTP側APIを用意する
-    synthesis_morphing_parameter = lru_cache(maxsize=4)(_synthesis_morphing_parameter)
 
     # @app.on_event("startup")
     # async def start_catch_disconnection():
@@ -260,7 +244,7 @@ def generate_app(
         query: AudioQuery,
         speaker: int,
         enable_interrogative_upspeak: bool = Query(  # noqa: B008
-            default=True,
+            default=False,
             description="疑問系のテキストが与えられたら語尾を自動調整する",
         ),
         core_version: Optional[str] = None,
@@ -293,16 +277,10 @@ def generate_app(
         summary="音声合成する（キャンセル可能）",
     )
     def cancellable_synthesis(query: AudioQuery, speaker: int, request: Request):
-        if not args.enable_cancellable_synthesis:
-            raise HTTPException(
-                status_code=404,
-                detail="実験的機能はデフォルトで無効になっています。使用するには引数を指定してください。",
-            )
-        f_name = cancellable_engine.synthesis(
-            query=query, speaker_id=speaker, request=request
+        raise HTTPException(
+            status_code=404,
+            detail="本機能を使用することはできません。",
         )
-
-        return FileResponse(f_name, media_type="audio/wav")
 
     @app.post(
         "/multi_synthesis",
@@ -376,31 +354,10 @@ def generate_app(
         指定された2人の話者で音声を合成、指定した割合でモーフィングした音声を得ます。
         モーフィングの割合は`morph_rate`で指定でき、0.0でベースの話者、1.0でターゲットの話者に近づきます。
         """
-        engine = get_engine(core_version)
-
-        # 生成したパラメータはキャッシュされる
-        morph_param = synthesis_morphing_parameter(
-            engine=engine,
-            query=query,
-            base_speaker=base_speaker,
-            target_speaker=target_speaker,
+        raise HTTPException(
+            status_code=404,
+            detail="本機能を使用することはできません。",
         )
-
-        morph_wave = synthesis_morphing(
-            morph_param=morph_param,
-            morph_rate=morph_rate,
-            output_stereo=query.outputStereo,
-        )
-
-        with NamedTemporaryFile(delete=False) as f:
-            soundfile.write(
-                file=f,
-                data=morph_wave,
-                samplerate=morph_param.fs,
-                format="WAV",
-            )
-
-        return FileResponse(f.name, media_type="audio/wav")
 
     @app.post(
         "/connect_waves",
@@ -537,44 +494,78 @@ def generate_app(
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=50021)
     parser.add_argument("--use_gpu", action="store_true")
-    parser.add_argument("--voicevox_dir", type=Path, default=None)
-    parser.add_argument("--voicelib_dir", type=Path, default=None, action="append")
-    parser.add_argument("--runtime_dir", type=Path, default=None, action="append")
     parser.add_argument("--enable_mock", action="store_true")
-    parser.add_argument("--enable_cancellable_synthesis", action="store_true")
-    parser.add_argument("--init_processes", type=int, default=2)
-
-    # 引数へcpu_num_threadsの指定がなければ、環境変数をロールします。
-    # 環境変数にもない場合は、Noneのままとします。
-    # VV_CPU_NUM_THREADSが空文字列でなく数値でもない場合、エラー終了します。
-    parser.add_argument(
-        "--cpu_num_threads", type=int, default=os.getenv("VV_CPU_NUM_THREADS") or None
-    )
 
     args = parser.parse_args()
 
-    cpu_num_threads: Optional[int] = args.cpu_num_threads
+    speakers_settings = [
+        {
+            "name": "dummy",
+            "styles": [
+                {
+                    "name": "ノーマル",
+                    "id": 0,
+                },
+            ],
+            "speaker_uuid": "18c34dd2-c50e-4160-94ee-3416b2eeb359",
+            "version": "0.10.0",
+            "text2speech_args": {
+                "model_file": "/path/to/dummy.pth",
+                "train_config": "/path/to/dummy.yaml",
+            },
+            "token_id_converter_args": {
+                "token_list": yaml.safe_load(Path("/path/to/dummy.yaml").open())[
+                    "token_list"
+                ],
+                "unk_symbol": "<unk>",
+            },
+            "text2speech_call_args": {
+                "decode_conf": {
+                    "noise_scale": 0.33,
+                    "noise_scale_dur": 0.33,
+                },
+            },
+        },
+        {
+            "name": "dummy2",
+            "styles": [
+                {
+                    "name": "ノーマル",
+                    "id": 1,
+                },
+            ],
+            "speaker_uuid": "563e9441-b16c-4517-bcc5-0c49c2c61f9f",
+            "version": "0.10.0",
+            "text2speech_args": {
+                "model_file": "/path/to/dummy2.pth",
+                "train_config": "/path/to/dummy2.yaml",
+            },
+            "token_id_converter_args": {
+                "token_list": yaml.safe_load(Path("/path/to/dummy2.yaml").open())[
+                    "token_list"
+                ],
+                "unk_symbol": "<unk>",
+            },
+            "text2speech_call_args": {
+                "decode_conf": {
+                    "noise_scale": 0.33,
+                    "noise_scale_dur": 0.33,
+                },
+            },
+        },
+    ]
 
     synthesis_engines = make_synthesis_engines(
+        speakers_settings=speakers_settings,
         use_gpu=args.use_gpu,
-        voicelib_dirs=args.voicelib_dir,
-        voicevox_dir=args.voicevox_dir,
-        runtime_dirs=args.runtime_dir,
         enable_mock=args.enable_mock,
     )
     assert len(synthesis_engines) != 0, "音声合成エンジンがありません。"
     latest_core_version = str(max([LooseVersion(ver) for ver in synthesis_engines]))
-
-    cancellable_engine = None
-    # make_synthesis_engine周りの仕様が変わったので一旦cancellable機能を停止する
-    if args.enable_cancellable_synthesis:
-        # cancellable_engine = CancellableEngine(args, voicelib_dir, cpu_num_threads)
-        raise RuntimeError("現在のバージョンではcancellable機能を使用することはできません。")
 
     uvicorn.run(
         generate_app(synthesis_engines, latest_core_version),
