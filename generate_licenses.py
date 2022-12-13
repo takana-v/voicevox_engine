@@ -206,6 +206,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/streamlit/streamlit/99b2977f07e3e3a0f09435c27e07df7642f6116c/LICENSE"  # noqa: B950
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "validators":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/python-validators/validators/9c35f185c0d44c3cb1c7433c66e3dfbb921e5e54/LICENSE"  # noqa: B950
+                ) as res:
+                    license.text = res.read().decode()
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
