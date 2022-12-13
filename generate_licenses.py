@@ -138,7 +138,7 @@ def generate_licenses() -> List[License]:
     # jsonschema
     # windows環境でjsonschemaのライセンスを取得しようとするとエラーで落ちるのでここで処理する
     with urllib.request.urlopen(
-        "https://raw.githubusercontent.com/python-jsonschema/jsonschema/dbc398245a583cb2366795dc529ae042d10c1577/COPYING"
+        "https://raw.githubusercontent.com/python-jsonschema/jsonschema/dbc398245a583cb2366795dc529ae042d10c1577/COPYING"  # noqa: B950
     ) as res:
         licenses.append(
             License(
