@@ -201,6 +201,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/protocolbuffers/protobuf/fe271ab76f2ad2b2b28c10443865d2af21e27e0e/LICENSE"  # noqa: B950
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "streamlit":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/streamlit/streamlit/99b2977f07e3e3a0f09435c27e07df7642f6116c/LICENSE"  # noqa: B950
+                ) as res:
+                    license.text = res.read().decode()
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
