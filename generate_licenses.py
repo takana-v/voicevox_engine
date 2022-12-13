@@ -135,6 +135,20 @@ def generate_licenses() -> List[License]:
             )
         )
 
+    # jsonschema
+    # windows環境でjsonschemaのライセンスを取得しようとするとエラーで落ちるのでここで処理する
+    with urllib.request.urlopen(
+        "https://raw.githubusercontent.com/python-jsonschema/jsonschema/dbc398245a583cb2366795dc529ae042d10c1577/COPYING"
+    ) as res:
+        licenses.append(
+            License(
+                name="jsonschema",
+                version="4.17.3",
+                license="MIT license",
+                text=res.read().decode(),
+            )
+        )
+
     # pip
     licenses_json = json.loads(
         subprocess.run(
@@ -143,7 +157,8 @@ def generate_licenses() -> List[License]:
             "--format=json "
             "--with-urls "
             "--with-license-file "
-            "--no-license-path ",
+            "--no-license-path "
+            "--ignore-packages jsonschema ",
             shell=True,
             capture_output=True,
             check=True,
@@ -189,11 +204,6 @@ def generate_licenses() -> List[License]:
             elif license.name.lower() == "distlib":
                 with urllib.request.urlopen(
                     "https://bitbucket.org/pypa/distlib/raw/7d93712134b28401407da27382f2b6236c87623a/LICENSE.txt"  # noqa: B950
-                ) as res:
-                    license.text = res.read().decode()
-            elif license.name.lower() == "jsonschema":
-                with urllib.request.urlopen(
-                    "https://raw.githubusercontent.com/python-jsonschema/jsonschema/dbc398245a583cb2366795dc529ae042d10c1577/COPYING"  # noqa: B950
                 ) as res:
                     license.text = res.read().decode()
             elif license.name.lower() == "protobuf":
