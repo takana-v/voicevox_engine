@@ -196,6 +196,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/python-jsonschema/jsonschema/v4.17.3/COPYING"  # noqa: B950
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "protobuf":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/protocolbuffers/protobuf/fe271ab76f2ad2b2b28c10443865d2af21e27e0e/LICENSE"  # noqa: B950
+                ) as res:
+                    license.text = res.read().decode()
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
