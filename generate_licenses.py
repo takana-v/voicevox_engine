@@ -193,7 +193,7 @@ def generate_licenses() -> List[License]:
                     license.text = res.read().decode()
             elif license.name.lower() == "jsonschema":
                 with urllib.request.urlopen(
-                    "https://raw.githubusercontent.com/python-jsonschema/jsonschema/v4.17.3/COPYING"  # noqa: B950
+                    "https://raw.githubusercontent.com/python-jsonschema/jsonschema/dbc398245a583cb2366795dc529ae042d10c1577/COPYING"  # noqa: B950
                 ) as res:
                     license.text = res.read().decode()
             elif license.name.lower() == "protobuf":
