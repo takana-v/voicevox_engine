@@ -58,43 +58,44 @@ jobs:
             architecture: "x64"
             voicevox_core_asset_prefix: voicevox_core-windows-x64-cpu
             onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-win-x64-1.13.1.zip
+            ccache_url: https://github.com/ccache/ccache/releases/download/v4.4.1/ccache-4.4.1-windows-64.zip
+            nuitka_cache_path: nuitka_cache
             target: windows-cpu
           # Windows DirectML
-          - os: windows-2019
-            architecture: "x64"
-            voicevox_core_asset_prefix: voicevox_core-windows-x64-directml
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/Microsoft.ML.OnnxRuntime.DirectML.1.13.1.zip
-            directml_url: https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.10.0
-            target: windows-directml
+          #- os: windows-2019
+          #  architecture: "x64"
+          #  voicevox_core_asset_prefix: voicevox_core-windows-x64-directml
+          #  onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/Microsoft.ML.OnnxRuntime.DirectML.1.13.1.zip
+          #  directml_url: https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.10.0
+          #  target: windows-directml
           # Windows NVIDIA GPU
-          - os: windows-2019
-            architecture: "x64"
-            voicevox_core_asset_prefix: voicevox_core-windows-x64-cuda
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-win-x64-gpu-1.13.1.zip
-            cuda_version: "11.8.0"
-            cudnn_url: https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-8.9.2.26_cuda11-archive.zip
-            zlib_url: http://www.winimage.com/zLibDll/zlib123dllx64.zip
-            target: windows-nvidia
+          #- os: windows-2019
+          #  architecture: "x64"
+          #  voicevox_core_asset_prefix: voicevox_core-windows-x64-cuda
+          #  onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-win-x64-gpu-1.13.1.zip
+          #  cuda_version: "11.6.2"
+          #  cudnn_url: https://developer.download.nvidia.com/compute/redist/cudnn/v8.4.1/local_installers/11.6/cudnn-windows-x86_64-8.4.1.50_cuda11.6-archive.zip
+          #  target: windows-nvidia
           # Mac CPU (x64 arch only)
-          - os: macos-11
-            architecture: "x64"
-            voicevox_core_asset_prefix: voicevox_core-osx-x64-cpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-osx-x86_64-1.13.1.tgz
-            target: macos-x64
+          #- os: macos-11
+          #  architecture: "x64"
+          #  voicevox_core_asset_prefix: voicevox_core-osx-x64-cpu
+          #  onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-osx-x86_64-1.13.1.tgz
+          #  target: macos-x64
           # Linux CPU
-          - os: ubuntu-20.04
-            architecture: "x64"
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-1.13.1.tgz
-            target: linux-cpu
+          #- os: ubuntu-20.04
+          #  architecture: "x64"
+          #  voicevox_core_asset_prefix: voicevox_core-linux-x64-cpu
+          #  onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-1.13.1.tgz
+          #  target: linux-cpu
           # Linux NVIDIA GPU
-          - os: ubuntu-20.04
-            architecture: "x64"
-            voicevox_core_asset_prefix: voicevox_core-linux-x64-gpu
-            onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-gpu-1.13.1.tgz
-            cuda_version: "11.8.0"
-            cudnn_url: https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-8.9.2.26_cuda11-archive.tar.xz
-            target: linux-nvidia
+          # - os: ubuntu-20.04
+          #  architecture: "x64"
+          #  voicevox_core_asset_prefix: voicevox_core-linux-x64-gpu
+          #  onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/onnxruntime-linux-x64-gpu-1.13.1.tgz
+          #  cuda_version: "11.6.2"
+          #  cudnn_url: https://developer.download.nvidia.com/compute/redist/cudnn/v8.4.1/local_installers/11.6/cudnn-linux-x86_64-8.4.1.50_cuda11.6-archive.tar.xz
+          #  target: linux-nvidia
 
     runs-on: ${{ matrix.os }}
 
@@ -107,125 +108,128 @@ jobs:
       - name: declare variables
         id: vars
         run: |
-          echo "package_name=voicevox_engine-${{ matrix.target }}-${{ needs.config.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "artifact_name=bridge_plugin-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v3
 
-      # NOTE: The default 'sed' and 'split' of macOS is BSD 'sed' and 'split'.
-      #       There is a difference in specification between BSD 'sed' and 'split' and GNU 'sed' and 'split',
-      #       so you need to install GNU 'sed' and 'split'.
-      - name: Install GNU sed on macOS
-        if: startsWith(matrix.os, 'macos-')
+      - name: Show disk space (debug info)
+        shell: bash
         run: |
-          brew install gnu-sed coreutils
+          df -h
+
+      # NOTE: The default sed of macOS is BSD sed.
+      #       There is a difference in specification between BSD sed and GNU sed,
+      #       so you need to install GNU sed.
+      #- name: Install GNU sed on macOS
+      #  if: startsWith(matrix.os, 'macos-')
+      #  shell: bash
+      #  run: brew install gnu-sed
 
       # ONNX Runtime providersとCUDA周りをリンクするために使う
-      - name: Install patchelf
-        if: startsWith(matrix.os, 'ubuntu-') && endsWith(matrix.target, 'nvidia')
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y patchelf
+      #- name: Install patchelf
+      #  if: startsWith(matrix.os, 'ubuntu-') && endsWith(matrix.target, 'nvidia')
+      #  run: |
+      #    sudo apt-get update
+      #    sudo apt-get install -y patchelf
 
       # Download CUDA
-      - name: Restore cached CUDA
-        if: matrix.cuda_version != ''
-        uses: actions/cache/restore@v3
-        id: cuda-dll-cache-restore
-        with:
-          # update this key when ONNX Runtime CUDA dependency changed
-          key: ${{ matrix.os }}-cuda-dll-${{ matrix.cuda_version }}-v1
-          path: download/cuda
+      #- name: Prepare CUDA DLL cache
+      #  if: matrix.cuda_version != ''
+      #  uses: actions/cache@v3
+      #  id: cuda-dll-cache
+      #  with:
+      #    # update this key when ONNX Runtime CUDA dependency changed
+      #    key: ${{ matrix.os }}-cuda-dll-${{ matrix.cuda_version }}-v1
+      #    path: download/cuda
 
-      - name: Setup CUDA
-        if: matrix.cuda_version != '' && steps.cuda-dll-cache-restore.outputs.cache-hit != 'true'
-        uses: Jimver/cuda-toolkit@v0.2.10
-        id: cuda-toolkit
-        with:
-          method: network
-          cuda: ${{ matrix.cuda_version }}
+      #- name: Setup CUDA
+      #  if: matrix.cuda_version != '' && steps.cuda-dll-cache.outputs.cache-hit != 'true'
+      #  uses: Jimver/cuda-toolkit@v0.2.8
+      #  id: cuda-toolkit
+      #  with:
+      #    method: network
+      #    cuda: ${{ matrix.cuda_version }}
 
-      - name: Extract CUDA Dynamic Libraries
-        if: matrix.cuda_version != '' && steps.cuda-dll-cache-restore.outputs.cache-hit != 'true'
-        run: |
-          set -eux
+      #- name: Extract CUDA Dynamic Libraries
+      #  if: matrix.cuda_version != '' && steps.cuda-dll-cache.outputs.cache-hit != 'true'
+      #  shell: bash
+      #  run: |
+      #    set -eux
 
-          CUDA_ROOT=$( echo "${{ steps.cuda-toolkit.outputs.CUDA_PATH }}" | tr '\\' '/' )
+      #    CUDA_ROOT=$( echo "${{ steps.cuda-toolkit.outputs.CUDA_PATH }}" | tr '\\' '/' )
 
-          mkdir -p download/cuda/bin
-          if [[ ${{ matrix.os }} == windows-* ]]; then
-            mv "${CUDA_ROOT}/bin/"*.dll download/cuda/bin/
+      #    mkdir -p download/cuda/bin
+      #    if [[ ${{ matrix.os }} == windows-* ]]; then
+      #      mv "${CUDA_ROOT}/bin/"*.dll download/cuda/bin/
 
-            # remove CUDA to reduce disk usage
-            rm -rf "${CUDA_ROOT}"
-          else
-            cp "${CUDA_ROOT}/lib64/"libcublas.so.* download/cuda/bin/
-            cp "${CUDA_ROOT}/lib64/"libcublasLt.so.* download/cuda/bin/
-            cp "${CUDA_ROOT}/lib64/"libcudart.so.* download/cuda/bin/
-            cp "${CUDA_ROOT}/lib64/"libcufft.so.* download/cuda/bin/
-            cp "${CUDA_ROOT}/lib64/"libcurand.so.* download/cuda/bin/
+      #      rm -rf "${CUDA_ROOT}"
+      #    else
+      #      cp "${CUDA_ROOT}/lib64/"libcublas.so.* download/cuda/bin/
+      #      cp "${CUDA_ROOT}/lib64/"libcublasLt.so.* download/cuda/bin/
+      #      cp "${CUDA_ROOT}/lib64/"libcudart.so.* download/cuda/bin/
+      #      cp "${CUDA_ROOT}/lib64/"libcufft.so.* download/cuda/bin/
+      #      cp "${CUDA_ROOT}/lib64/"libcurand.so.* download/cuda/bin/
 
-            # remove unneed full version libraries
-            rm -f download/cuda/bin/libcublas.so.*.*
-            rm -f download/cuda/bin/libcublasLt.so.*.*
-            rm -f download/cuda/bin/libcufft.so.*.*
-            rm -f download/cuda/bin/libcurand.so.*.*
-            rm -f download/cuda/bin/libcudart.so.*.*.*
+      #      # remove unneed full version libraries
+      #      rm -f download/cuda/bin/libcublas.so.*.* 
+      #      rm -f download/cuda/bin/libcublasLt.so.*.*
+      #      rm -f download/cuda/bin/libcufft.so.*.*
+      #      rm -f download/cuda/bin/libcurand.so.*.*
+      #      rm -f download/cuda/bin/libcudart.so.*.*.*
+      #    fi
 
-            # remove CUDA to reduce disk usage
-            sudo rm -rf "${CUDA_ROOT}"
-          fi
+      #- name: Show disk space (debug info)
+      #  if: matrix.cuda_version != ''
+      #  shell: bash
+      #  run: |
+      #    df -h
 
-      - name: Save CUDA cache
-        if: matrix.cuda_version != ''
-        uses: actions/cache/save@v3
-        with:
-          key: ${{ steps.cuda-dll-cache-restore.outputs.cache-primary-key }}
-          path: download/cuda
+      ## Download cuDNN
+      #- name: Export cuDNN url to calc hash
+      #  if: matrix.cudnn_url != ''
+      #  shell: bash
+      #  run: echo "${{ matrix.cudnn_url }}" > download/cudnn_url.txt
 
-      # Download cuDNN
-      - name: Export cuDNN url to calc hash
-        if: matrix.cudnn_url != ''
-        run: echo "${{ matrix.cudnn_url }}" > download/cudnn_url.txt
+      #- name: Prepare cuDNN cache
+      #  if: matrix.cudnn_url != ''
+      #  uses: actions/cache@v3
+      #  id: cudnn-dll-cache
+      #  with:
+      #    # update this key when ONNX Runtime cuDNN dependency changed
+      #    key: ${{ matrix.os }}-cudnn-dll-${{ hashFiles('download/cudnn_url.txt') }}-v1
+      #    path: download/cudnn
 
-      - name: Restore cached cuDNN
-        if: matrix.cudnn_url != ''
-        uses: actions/cache/restore@v3
-        id: cudnn-dll-cache-restore
-        with:
-          # update this key when ONNX Runtime cuDNN dependency changed
-          key: ${{ matrix.os }}-cudnn-dll-${{ hashFiles('download/cudnn_url.txt') }}-v1
-          path: download/cudnn
+      #- name: Download and extract cuDNN Dynamic Libraries
+      #  if: matrix.cudnn_url != '' && steps.cudnn-dll-cache.outputs.cache-hit != 'true'
+      #  shell: bash
+      #  run: |
+      #    set -eux
 
-      - name: Download and extract cuDNN Dynamic Libraries
-        if: matrix.cudnn_url != '' && steps.cudnn-dll-cache-restore.outputs.cache-hit != 'true'
-        run: |
-          set -eux
+      #    if [[ ${{ matrix.os }} == windows-* ]]; then
+      #      curl -L "${{ matrix.cudnn_url }}" > download/cudnn.zip
 
-          if [[ ${{ matrix.os }} == windows-* ]]; then
-            curl -L "${{ matrix.cudnn_url }}" > download/cudnn.zip
+      #      unzip download/cudnn.zip cudnn-*/bin/*.dll -d download/cudnn_tmp
 
-            unzip download/cudnn.zip cudnn-*/bin/*.dll -d download/cudnn_tmp
+      #      mkdir -p download/cudnn/bin
+      #      mv download/cudnn_tmp/cudnn-*/bin/*.dll download/cudnn/bin/
+      #      rm -rf download/cudnn_tmp
 
-            mkdir -p download/cudnn/bin
-            mv download/cudnn_tmp/cudnn-*/bin/*.dll download/cudnn/bin/
-            rm -rf download/cudnn_tmp
+      #      rm download/cudnn.zip
+      #    else
+      #      curl -L "${{ matrix.cudnn_url }}" > download/cudnn.tar.xz
 
-            rm download/cudnn.zip
-          else
-            curl -L "${{ matrix.cudnn_url }}" > download/cudnn.tar.xz
+      #      tar -Jxf download/cudnn.tar.xz -C download/
 
-            tar -Jxf download/cudnn.tar.xz -C download/
+      #      mkdir -p download/cudnn/bin
+      #      cp download/cudnn-*/lib/libcudnn.so.* download/cudnn/bin/
+      #      cp download/cudnn-*/lib/libcudnn_*_infer.so.* download/cudnn/bin/
 
-            mkdir -p download/cudnn/bin
-            cp download/cudnn-*/lib/libcudnn.so.* download/cudnn/bin/
-            cp download/cudnn-*/lib/libcudnn_*_infer.so.* download/cudnn/bin/
+      #      # remove unneed full version libraries
+      #      rm -f download/cudnn/bin/libcudnn.so.*.*
+      #      rm -f download/cudnn/bin/libcudnn_*_infer.so.*.*
 
-            # remove unneed full version libraries
-            rm -f download/cudnn/bin/libcudnn.so.*.*
-            rm -f download/cudnn/bin/libcudnn_*_infer.so.*.*
-
-            rm download/cudnn.tar.xz
-          fi
+      #      rm download/cudnn.tar.xz
+      #    fi
 
       - name: Save cuDNN cache
         if: matrix.cudnn_url != ''
@@ -305,58 +309,85 @@ jobs:
             exit "$EXIT_CODE"
           fi
 
-      - name: Create download directory
-        run: mkdir -p download/
+      #- name: Create download directory
+      #  shell: bash
+      #  run: mkdir -p download/
+
+      # Install Ccache
+      - name: Export Ccache url to calc hash
+        if: startsWith(matrix.os, 'windows-')
+        shell: bash
+        run: echo "${{ matrix.ccache_url }}" > download/ccache_url.txt
+
+      - name: Prepare Ccache
+        if: startsWith(matrix.os, 'windows-')
+        uses: actions/cache@v3
+        id: ccache-cache
+        with:
+          key: ${{ matrix.os }}-ccache-${{ hashFiles('download/ccache_url.txt') }}
+          path: download/ccache
+
+      - name: Download Ccache
+        if: startsWith(matrix.os, 'windows-') && steps.ccache-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          curl -L "${{ matrix.ccache_url }}" > download/ccache.zip
+          unzip download/ccache.zip -d download/
+          rm download/ccache.zip
+          mv download/ccache-*/ download/ccache
+
+      - name: Install Ccache
+        if: startsWith(matrix.os, 'windows-')
+        shell: bash
+        run: |
+          echo "$HOME/download/ccache" >> $GITHUB_PATH
 
       # Donwload DirectML
-      - name: Export DirectML url to calc hash
-        if: endswith(matrix.target, '-directml')
-        run: echo "${{ matrix.directml_url }}" >> download/directml_url.txt
+      #- name: Export DirectML url to calc hash
+      #  if: endswith(matrix.target, '-directml')
+      #  shell: bash
+      #  run: echo "${{ matrix.directml_url }}" >> download/directml_url.txt
 
-      - name: Restore cached DirectML
-        if: endswith(matrix.target, '-directml')
-        uses: actions/cache/restore@v3
-        id: directml-cache-restore
-        with:
-          key: directml-cache-v1-${{ hashFiles('download/directml_url.txt') }}
-          path: download/directml
+      #- name: Cache DirectML
+      #  if: endswith(matrix.target, '-directml')
+      #  uses: actions/cache@v3
+      #  id: directml-cache
+      #  with:
+      #    key: directml-cache-v1-${{ hashFiles('download/directml_url.txt') }}
+      #    path: download/directml
 
-      - name: Download DirectML
-        if: steps.directml-cache-restore.outputs.cache-hit != 'true' && endswith(matrix.target, '-directml')
-        run: |
-          curl -L "${{ matrix.directml_url }}" -o download/directml.zip
-          mkdir -p download/directml
+      #- name: Download DirectML
+      #  if: steps.directml-cache.outputs.cache-hit != 'true' && endswith(matrix.target, '-directml')
+      #  shell: bash
+      #  run: |
+      #    curl -L "${{ matrix.directml_url }}" -o download/directml.zip
+      #    mkdir -p download/directml
 
-          # extract only dlls
-          unzip download/directml.zip bin/${{ matrix.architecture }}-win/DirectML.dll -d download/directml
-          rm download/directml.zip
-          mv download/directml/bin/${{ matrix.architecture }}-win/DirectML.dll download/directml/DirectML.dll
-          rm -r download/directml/bin
-
-      - name: Save DirectML cache
-        if: endswith(matrix.target, '-directml')
-        uses: actions/cache/save@v3
-        with:
-          key: ${{ steps.directml-cache-restore.outputs.cache-primary-key }}
-          path: download/directml
+      #    # extract only dlls
+      #    unzip download/directml.zip bin/${{ matrix.architecture }}-win/DirectML.dll -d download/directml
+      #    rm download/directml.zip
+      #    mv download/directml/bin/${{ matrix.architecture }}-win/DirectML.dll download/directml/DirectML.dll
+      #    rm -r download/directml/bin
 
       # Download ONNX Runtime
       - name: Export ONNX Runtime url to calc hash
+        shell: bash
         run: echo "${{ matrix.onnxruntime_url }}" > download/onnxruntime_url.txt
 
-      - name: Restore cached ONNX Runtime
-        uses: actions/cache/restore@v3
-        id: onnxruntime-cache-restore
+      - name: Prepare ONNX Runtime cache
+        uses: actions/cache@v3
+        id: onnxruntime-cache
         with:
           key: ${{ matrix.os }}-onnxruntime-${{ hashFiles('download/onnxruntime_url.txt') }}-v1
           path: download/onnxruntime
 
       - name: Download ONNX Runtime (Windows)
-        if: steps.onnxruntime-cache-restore.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows-')
+        if: steps.onnxruntime-cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows-')
+        shell: bash
         run: |
           curl -L "${{ matrix.onnxruntime_url }}" > download/onnxruntime.zip
 
-          # extract only dlls
+      #    # extract only dlls
           if [[ ${{ matrix.target }} != *-directml ]]; then
             unzip download/onnxruntime.zip onnxruntime-*/lib/*.dll -d download/
             mv download/onnxruntime-* download/onnxruntime
@@ -369,13 +400,14 @@ jobs:
 
           rm download/onnxruntime.zip
 
-      - name: Download ONNX Runtime (Mac/Linux)
-        if: steps.onnxruntime-cache-restore.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows-') != true
-        run: |
-          curl -L "${{ matrix.onnxruntime_url }}" > download/onnxruntime.tgz
-          mkdir -p download/onnxruntime
-          tar xf "download/onnxruntime.tgz" -C "download/onnxruntime" --strip-components 1
-          rm download/onnxruntime.tgz
+      #- name: Download ONNX Runtime (Mac/Linux)
+      #  if: steps.onnxruntime-cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'windows-') != true
+      #  shell: bash
+      #  run: |
+      #    curl -L "${{ matrix.onnxruntime_url }}" > download/onnxruntime.tgz
+      #    mkdir -p download/onnxruntime
+      #    tar xf "download/onnxruntime.tgz" -C "download/onnxruntime" --strip-components 1
+      #    rm download/onnxruntime.tgz
 
       - name: Save ONNX Runtime cache
         uses: actions/cache/save@v3
@@ -401,6 +433,7 @@ jobs:
 
       # Merge VOICEVOX RESOURCE
       - name: Merge VOICEVOX RESOURCE
+        shell: bash
         env:
           DOWNLOAD_RESOURCE_PATH: download/resource
         run: bash build_util/process_voicevox_resource.bash
@@ -415,6 +448,7 @@ jobs:
 
       - name: Download VOICEVOX Core
         if: steps.voicevox-core-cache.outputs.cache-hit != 'true'
+        shell: bash
         env:
           VOICEVOX_CORE_ASSET_NAME: ${{ matrix.voicevox_core_asset_prefix }}-${{ env.VOICEVOX_CORE_VERSION }}
         run: |
@@ -437,6 +471,7 @@ jobs:
           rm download/${{ env.VOICEVOX_CORE_ASSET_NAME }}.zip
 
       - name: Copy VOICEVOX Core Models
+        shell: bash
         run: |
           cp -r download/core/model ./
 
@@ -446,8 +481,24 @@ jobs:
           bash build_util/create_venv_and_generate_licenses.bash
           # FIXME: VOICEVOX (editor) cannot build without licenses.json
           cp engine_manifest_assets/dependency_licenses.json licenses.json
+      
+      - name: Cache Nuitka (ccache, module-cache)
+        if: startsWith(matrix.os, 'windows-')
+        uses: actions/cache@v3
+        id: nuitka-cache
+        with:
+          path: ${{ matrix.nuitka_cache_path }}
+          key: ${{ runner.os }}-nuitka-${{ matrix.artifact_name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nuitka-${{ matrix.artifact_name }}-
 
-      - name: Build run.py with PyInstaller
+      - name: Show disk space (debug info)
+        shell: bash
+        run: |
+          df -h
+
+      - name: Build run.py with nuitka
+        shell: bash
         run: |
           set -eux
 
@@ -455,111 +506,136 @@ jobs:
           mv -f engine_manifest.json.tmp engine_manifest.json
 
           # Replace version & specify dynamic libraries
-          $sed -i "s/__version__ = \"latest\"/__version__ = \"${{ needs.config.outputs.version_or_latest }}\"/" voicevox_engine/__init__.py
-          if [[ ${{ matrix.os }} == windows-* ]]; then
-            LIBCORE_PATH=download/core/voicevox_core.dll
-            LIBONNXRUNTIME_PATH=download/onnxruntime/lib/onnxruntime.dll
-          elif [[ ${{ matrix.os }} == macos-* ]]; then
-            LIBCORE_PATH=download/core/libvoicevox_core.dylib
-            LIBONNXRUNTIME_PATH=download/onnxruntime/lib/libonnxruntime.dylib
+          if [[ ${{ matrix.os }} == macos-* ]]; then
+            gsed -i "s/__version__ = \"latest\"/__version__ = \"${{ needs.config.outputs.version_or_latest }}\"/" voicevox_engine/__init__.py
           else
-            LIBCORE_PATH=download/core/libvoicevox_core.so
-            LIBONNXRUNTIME_PATH=download/onnxruntime/lib/libonnxruntime.so
+            sed -i "s/__version__ = \"latest\"/__version__ = \"${{ needs.config.outputs.version_or_latest }}\"/" voicevox_engine/__init__.py
           fi
 
-          LIBCORE_PATH="$LIBCORE_PATH" \
-          LIBONNXRUNTIME_PATH="$LIBONNXRUNTIME_PATH" \
-          pyinstaller --noconfirm run.spec
+          python -m nuitka \
+            --standalone \
+            --assume-yes-for-downloads \
+            --plugin-enable=numpy \
+            --plugin-enable=multiprocessing \
+            --follow-import-to=numpy \
+            --follow-import-to=aiofiles \
+            --include-package=uvicorn \
+            --include-package=anyio \
+            --include-package-data=pyopenjtalk \
+            --include-package-data=scipy \
+            --include-data-file="licenses.json=./" \
+            --include-data-file="presets.yaml=./" \
+            --include-data-file="default.csv=./" \
+            --include-data-file="engine_manifest.json=./" \
+            --include-data-file="download/onnxruntime/lib/onnxruntime.dll=./" \
+            --include-data-file="download/core/core.dll=./" \
+            --include-data-dir="speaker_info=./speaker_info" \
+            --include-data-dir="engine_manifest_assets=./engine_manifest_assets" \
+            --msvc=14.2 \
+            --follow-imports \
+            --no-prefer-source-code \
+            run.py
 
-      - name: Gather DLL dependencies to dist/run/ (Windows)
+      - name: Show disk space (debug info)
+        shell: bash
+        run: |
+          df -h
+
+      - name: Create artifact directory with symlink
         if: startsWith(matrix.os, 'windows-')
+        shell: bash
+        env:
+          PYTHON_SITE_PACKAGES_DIR: C:/hostedtoolcache/windows/python/${{ steps.setup-python.outputs.python-version }}/x64/lib/site-packages
+          # create symlink instead of copy (Git Bash)
+          # https://qiita.com/ucho/items/c5ea0beb8acf2f1e4772
+          MSYS: winsymlinks:nativestrict
         run: |
           set -eux
 
-          # Move DLL dependencies (cache already saved)
+          # Copy DLL dependencies
 
           if [ -f "download/onnxruntime/lib/onnxruntime_providers_cuda.dll" ]; then
             # ONNX Runtime providers (PyInstaller does not copy dynamic loaded libraries)
-            mv download/onnxruntime/lib/onnxruntime_*.dll dist/run/
+            ln -sf "$(pwd)/download/onnxruntime/lib"/onnxruntime_*.dll dist/run/
 
             # CUDA
-            mv download/cuda/bin/cublas64_*.dll dist/run/
-            mv download/cuda/bin/cublasLt64_*.dll dist/run/
-            mv download/cuda/bin/cudart64_*.dll dist/run/
-            mv download/cuda/bin/cufft64_*.dll dist/run/
-            mv download/cuda/bin/curand64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cuda/bin"/cublas64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cuda/bin"/cublasLt64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cuda/bin"/cudart64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cuda/bin"/cufft64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cuda/bin"/curand64_*.dll dist/run/
 
             # cuDNN
-            mv download/cudnn/bin/cudnn64_*.dll dist/run/
-            mv download/cudnn/bin/cudnn_*_infer64*.dll dist/run/
-
-            # zlib
-            mv download/zlib/zlibwapi.dll dist/run/
-
-            # Remove source directories to reduce disk usage (already cached)
-            rm -rf download/onnxruntime
-            rm -rf download/cuda
-            rm -rf download/cudnn
-            rm -rf download/zlib
+            ln -sf "$(pwd)/download/cudnn/bin"/cudnn64_*.dll dist/run/
+            ln -sf "$(pwd)/download/cudnn/bin"/cudnn_*_infer64*.dll dist/run/
           fi
 
           if [[ ${{ matrix.target }} == *-directml ]]; then
             # DirectML
-            mv download/directml/DirectML.dll dist/run/
-
-            # Remove source directory (already cached)
-            rm -rf download/directml
+            ln -sf "$(pwd)/download/directml"/DirectML.dll dist/run/
           fi
 
-      - name: Gather DLL dependencies to dist/run/ (Linux CUDA)
-        if: startsWith(matrix.os, 'ubuntu-') && endsWith(matrix.target, 'nvidia')
-        run: |
-          set -eux
+      #- name: Create symlink of CUDA dependencies
+      #  if: startsWith(matrix.os, 'ubuntu-') && endsWith(matrix.target, 'nvidia')
+      #  shell: bash
+      #  run: |
+      #    set -eux
 
-          # Move DLL dependencies (cache already saved)
+      #    # ONNX Runtime providers (PyInstaller does not copy dynamic loaded libraries)
+      #    patchelf --set-rpath '$ORIGIN' "$(pwd)/download/onnxruntime/lib"/libonnxruntime_providers_*.so
+      #    ln -sf "$(pwd)/download/onnxruntime/lib"/libonnxruntime_*.so dist/run/
 
-          # ONNX Runtime providers (PyInstaller does not copy dynamic loaded libraries)
-          patchelf --set-rpath '$ORIGIN' "$(pwd)/download/onnxruntime/lib"/libonnxruntime_providers_*.so
-          mv download/onnxruntime/lib/libonnxruntime_*.so dist/run/
+      #    # CUDA
+      #    ln -sf "$(pwd)/download/cuda/bin"/libcublas.so.* dist/run/
+      #    ln -sf "$(pwd)/download/cuda/bin"/libcublasLt.so.* dist/run/
+      #    ln -sf "$(pwd)/download/cuda/bin"/libcudart.so.* dist/run/
+      #    ln -sf "$(pwd)/download/cuda/bin"/libcufft.so.* dist/run/
+      #    ln -sf "$(pwd)/download/cuda/bin"/libcurand.so.* dist/run/
 
-          # CUDA
-          mv download/cuda/bin/libcublas.so.* dist/run/
-          mv download/cuda/bin/libcublasLt.so.* dist/run/
-          mv download/cuda/bin/libcudart.so.* dist/run/
-          mv download/cuda/bin/libcufft.so.* dist/run/
-          mv download/cuda/bin/libcurand.so.* dist/run/
+      #    # cuDNN
+      #    ln -sf "$(pwd)/download/cudnn/bin"/libcudnn.so.* dist/run/
+      #    ln -sf "$(pwd)/download/cudnn/bin"/libcudnn_*_infer.so.* dist/run/
 
-          # cuDNN
-          mv download/cudnn/bin/libcudnn.so.* dist/run/
-          mv download/cudnn/bin/libcudnn_*_infer.so.* dist/run/
+      #- name: Set @rpath to @executable_path
+      #  if: startsWith(matrix.os, 'macos-')
+      #  run: |
+      #    install_name_tool -add_rpath @executable_path/. dist/run/run
 
-          # Remove source directories to reduce disk usage (already cached)
-          rm -rf download/onnxruntime
-          rm -rf download/cuda
-          rm -rf download/cudnn
-
-      - name: Set @rpath to @executable_path
-        if: startsWith(matrix.os, 'macos-')
-        run: |
-          install_name_tool -add_rpath @executable_path/. dist/run/run
-
-      - name: Code signing
-        if: github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows-')
-        run: |
-          bash build_util/codesign.bash "dist/run/run.exe"
-        env:
-          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+      #- name: Code signing
+      #  if: github.event.inputs.code_signing == 'true' && startsWith(matrix.os, 'windows-')
+      #  shell: bash
+      #  run: |
+      #    bash build_util/codesign.bash "dist/run/run.exe"
+      #  env:
+      #    CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+      #    CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
       - name: Rename artifact directory to archive
         run: |
           mv dist/run/ "${{ matrix.target }}/"
 
-      # 7z archives
-      - name: Create 7z archives
+  upload-to-release:
+    if: needs.config.outputs.version != ''
+    needs: [config, build-all]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          #- macos-x64
+          #- linux-cpu
+          #- linux-nvidia
+          - windows-cpu
+          #- windows-directml
+          #- windows-nvidia
+    steps:
+      - name: declare variables
+        id: vars
+        shell: bash
         run: |
-          # Compress to artifact.7z.001, artifact.7z.002, ...
-          7z -r -v1900m a "${{ steps.vars.outputs.package_name }}.7z" "${{ matrix.target }}/"
+          echo "package_name=bridge_plugin-${{ matrix.target }}-${{ needs.config.outputs.version }}" >> $GITHUB_OUTPUT
+          : # this is exactly same as `steps.vars.outputs.artifact_name` in `build-all` job,
+          : # but since we cannot get the job outputs of matrix builds correctly, we need to redefine here.
+          echo "artifact_name=bridge_plugin-${{ matrix.target }}-${{ needs.config.outputs.version_or_latest }}-${{ github.sha }}" >> $GITHUB_OUTPUT
 
           # Output splitted archive list
           ls ${{ steps.vars.outputs.package_name }}.7z.* > archives_7z.txt
